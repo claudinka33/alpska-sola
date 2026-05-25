@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { CheckCircle2, AlertCircle, Loader2, ArrowRight } from "lucide-react";
@@ -26,12 +27,15 @@ const znanja = [
   { value: "tekmovalno", label: "Tekmovalna raven" },
 ];
 
-export default function PrijavnaStranPage() {
+function PrijavnaStranContent() {
+  const searchParams = useSearchParams();
+  const initialProgram = searchParams.get("program") || "";
+
   const [stanje, setStanje] = useState<"obrazec" | "poslano" | "napaka">("obrazec");
   const [napaka, setNapaka] = useState("");
   const [posiljam, setPosiljam] = useState(false);
   const [form, setForm] = useState({
-    program: "",
+    program: initialProgram,
     otrok_ime: "",
     otrok_priimek: "",
     otrok_rojstvo: "",
@@ -45,6 +49,13 @@ export default function PrijavnaStranPage() {
     opomba: "",
     soglasje: false,
   });
+
+  // Posodobi program če se URL parameter spremeni
+  useEffect(() => {
+    if (initialProgram && initialProgram !== form.program) {
+      setForm((f) => ({ ...f, program: initialProgram }));
+    }
+  }, [initialProgram]);
 
   const update = (k: string, v: string | boolean) => setForm({ ...form, [k]: v });
 
@@ -83,7 +94,7 @@ export default function PrijavnaStranPage() {
 
   if (stanje === "poslano") {
     return (
-      <main>
+      <>
         <Navbar />
         <section className="bg-gradient-to-b from-blue-50 to-white min-h-[70vh] flex items-center py-20">
           <div className="max-w-2xl mx-auto px-4 lg:px-8 text-center">
@@ -94,8 +105,8 @@ export default function PrijavnaStranPage() {
               Prijava uspešno poslana!
             </h1>
             <p className="text-lg text-slate-600 mb-8">
-              Hvala za prijavo. V kratkem se vam bomo oglasili na navedeni telefon
-              ali email za potrditev.
+              Hvala za prijavo. V kratkem se vam bomo oglasili na navedeni
+              telefon ali email za potrditev.
             </p>
             <div className="flex flex-wrap gap-3 justify-center">
               <Link
@@ -131,15 +142,14 @@ export default function PrijavnaStranPage() {
           </div>
         </section>
         <Footer />
-      </main>
+      </>
     );
   }
 
   return (
-    <main>
+    <>
       <Navbar />
 
-      {/* Header */}
       <section className="mountain-bg py-16 lg:py-20 border-b border-blue-100">
         <div className="max-w-3xl mx-auto px-4 lg:px-8 text-center">
           <div className="inline-flex items-center gap-3 text-xs font-bold tracking-widest text-brand-orange uppercase mb-3">
@@ -157,14 +167,12 @@ export default function PrijavnaStranPage() {
         </div>
       </section>
 
-      {/* Form */}
       <section className="bg-white py-12 lg:py-16">
         <div className="max-w-3xl mx-auto px-4 lg:px-8">
           <form
             onSubmit={onSubmit}
             className="bg-white border border-slate-200/70 rounded-2xl p-6 lg:p-10 shadow-sm"
           >
-            {/* Program */}
             <div className="mb-6">
               <h2 className="text-lg font-bold text-brand-navy mb-4 pb-2 border-b border-slate-100">
                 1. Izberi program
@@ -180,12 +188,18 @@ export default function PrijavnaStranPage() {
               >
                 <option value="">— izberi program —</option>
                 {programi.map((p) => (
-                  <option key={p.value} value={p.value}>{p.label}</option>
+                  <option key={p.value} value={p.value}>
+                    {p.label}
+                  </option>
                 ))}
               </select>
+              {initialProgram && (
+                <p className="text-xs text-green-700 mt-1.5 flex items-center gap-1">
+                  ✓ Program je avtomatsko izbran s strani.
+                </p>
+              )}
             </div>
 
-            {/* Otrok */}
             <div className="mb-6">
               <h2 className="text-lg font-bold text-brand-navy mb-4 pb-2 border-b border-slate-100">
                 2. Podatki o otroku
@@ -195,9 +209,7 @@ export default function PrijavnaStranPage() {
                 <Field label="Priimek otroka *" value={form.otrok_priimek} onChange={(v) => update("otrok_priimek", v)} required />
                 <Field label="Datum rojstva *" type="date" value={form.otrok_rojstvo} onChange={(v) => update("otrok_rojstvo", v)} required />
                 <div>
-                  <label className="block text-sm font-semibold text-brand-navy mb-1.5">
-                    Predznanje
-                  </label>
+                  <label className="block text-sm font-semibold text-brand-navy mb-1.5">Predznanje</label>
                   <select
                     value={form.otrok_znanje}
                     onChange={(e) => update("otrok_znanje", e.target.value)}
@@ -212,7 +224,6 @@ export default function PrijavnaStranPage() {
               </div>
             </div>
 
-            {/* Starši */}
             <div className="mb-6">
               <h2 className="text-lg font-bold text-brand-navy mb-4 pb-2 border-b border-slate-100">
                 3. Podatki o staršu
@@ -227,13 +238,12 @@ export default function PrijavnaStranPage() {
               </div>
             </div>
 
-            {/* Opomba */}
             <div className="mb-6">
               <h2 className="text-lg font-bold text-brand-navy mb-4 pb-2 border-b border-slate-100">
                 4. Dodatne informacije
               </h2>
               <label className="block text-sm font-semibold text-brand-navy mb-1.5">
-                Opomba (alergije, posebnosti, želje...)
+                Opomba (alergije, posebnosti, želje, izbira termina...)
               </label>
               <textarea
                 value={form.opomba}
@@ -243,7 +253,6 @@ export default function PrijavnaStranPage() {
               />
             </div>
 
-            {/* Soglasje */}
             <label className="flex items-start gap-3 mb-6 cursor-pointer">
               <input
                 type="checkbox"
@@ -284,25 +293,21 @@ export default function PrijavnaStranPage() {
       </section>
 
       <Footer />
+    </>
+  );
+}
+
+export default function PrijavnaStranPage() {
+  return (
+    <main>
+      <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 size={32} className="animate-spin text-brand-orange" /></div>}>
+        <PrijavnaStranContent />
+      </Suspense>
     </main>
   );
 }
 
-function Field({
-  label,
-  value,
-  onChange,
-  type = "text",
-  required = false,
-  placeholder,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  type?: string;
-  required?: boolean;
-  placeholder?: string;
-}) {
+function Field({ label, value, onChange, type = "text", required = false, placeholder }: { label: string; value: string; onChange: (v: string) => void; type?: string; required?: boolean; placeholder?: string; }) {
   return (
     <div>
       <label className="block text-sm font-semibold text-brand-navy mb-1.5">{label}</label>

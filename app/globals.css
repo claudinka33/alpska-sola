@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --brand-orange: #FF6B1A;
+  --brand-navy: #0C2340;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #ffffff;
+  color: #0C2340;
+  font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Mountain pattern utility */
+.mountain-bg {
+  background: linear-gradient(180deg, #d6e7f5 0%, #e8f1fa 40%, #f5fafe 100%);
+}
+
+/* Hide scrollbar but allow scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Subtle text gradient for accents */
+.text-gradient-orange {
+  background: linear-gradient(135deg, #FF6B1A 0%, #ff8c4a 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Button focus rings */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #FF6B1A;
+  outline-offset: 2px;
+}
